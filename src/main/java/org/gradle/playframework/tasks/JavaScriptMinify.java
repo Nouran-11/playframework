@@ -13,7 +13,9 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileVisitDetails;
 import org.gradle.api.file.FileVisitor;
+import org.gradle.api.internal.file.FileOperations;
 import org.gradle.api.internal.file.RelativeFile;
+import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.OutputDirectory;
@@ -29,11 +31,8 @@ import org.gradle.workers.WorkerExecutor;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 /**
  * Task to minify JavaScript assets.
@@ -79,7 +78,6 @@ public class JavaScriptMinify extends SourceTask {
     @TaskAction
     @SuppressWarnings("Convert2Lambda")
     void compileJavaScriptSources() {
-        notCompatibleWithConfigurationCache("This task accesses Task.getProject() during execution");
         StaleClassCleaner cleaner = new SimpleStaleClassCleaner(getOutputs());
         cleaner.addDirToClean(destinationDir.get().getAsFile());
         cleaner.execute();
@@ -119,8 +117,9 @@ public class JavaScriptMinify extends SourceTask {
         public void visitFile(final FileVisitDetails fileDetails) {
             final File outputFileDir = new File(destinationDir.get().getAsFile(), fileDetails.getRelativePath().getParent().getPathString());
 
-            // Copy the raw form using public API
-            getProject().copy(copySpec -> copySpec.from(fileDetails.getFile()).into(outputFileDir));
+            // Copy the raw form
+            FileOperations fileOperations = ((ProjectInternal) getProject()).getFileOperations();
+            fileOperations.copy(copySpec -> copySpec.from(fileDetails.getFile()).into(outputFileDir));
 
             // Capture the relative file
             relativeFiles.add(new RelativeFile(fileDetails.getFile(), fileDetails.getRelativePath()));
