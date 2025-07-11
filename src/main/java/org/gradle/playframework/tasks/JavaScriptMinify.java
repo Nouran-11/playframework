@@ -49,7 +49,7 @@ public class JavaScriptMinify extends SourceTask {
         this.include("**/*.js");
         this.destinationDir = getProject().getObjects().directoryProperty();
         this.compilerClasspath = getProject().files();
-        notCompatibleWithConfigurationCache("This task access project during execution");
+        notCompatibleWithConfigurationCache("This task accesses Task.getProject() during execution");
     }
 
     /**
