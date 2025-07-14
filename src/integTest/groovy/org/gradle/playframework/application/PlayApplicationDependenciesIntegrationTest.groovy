@@ -12,7 +12,7 @@ class PlayApplicationDependenciesIntegrationTest extends AbstractIntegrationTest
             plugins {
                 id 'org.gradle.playframework-application'
             }
-            
+
             ${playRepositories()}
         """
     }
@@ -52,10 +52,11 @@ class PlayApplicationDependenciesIntegrationTest extends AbstractIntegrationTest
                 play 'commons-lang:commons-lang:2.6'
                 play 'ch.qos.logback:logback-classic:1.2.3'
             }
-            
+
             task checkDeps {
+                def play = configurations.play
                 doLast {
-                    assert configurations.play.findAll { it.name == 'commons-lang-2.6.jar' || it.name == 'logback-classic-1.2.3.jar' }.size() == 2
+                    assert play.findAll { it.name == 'commons-lang-2.6.jar' || it.name == 'logback-classic-1.2.3.jar' }.size() == 2
                 }
             }
         """
